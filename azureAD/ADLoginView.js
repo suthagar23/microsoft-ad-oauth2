@@ -125,7 +125,7 @@ export default class ADLoginView extends React.Component {
     let prompt = context.getConfig().prompt
 
     if(context !== null) {
-      let result = `${authUrl}?response_type=code&client_id=${context.getConfig().client_id}` +
+      let result = `${authUrl}?client_id=${context.getConfig().client_id}&response_type=code` +
              (redirect ? `&redirect_url=${context.getConfig().redirect_uri}&nonce=rnad-${Date.now()}` : '') +
              (prompt ? `&prompt=${context.getConfig().prompt}` : '')
       
