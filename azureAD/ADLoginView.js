@@ -13,6 +13,7 @@ export default class ADLoginView extends React.Component {
 
   props : {
     onSuccess? : ?Function,
+    afterLogout? : ?Function,
     needLogout? : bool,
     style : any,
     onURLChange : Function,
@@ -29,6 +30,7 @@ export default class ADLoginView extends React.Component {
     authority_host : loginUrl,
     tenant : 'common',
     onSuccess : () => {},
+    afterLogout : () => {},
     onPageRequest : null
   };
 
@@ -152,6 +154,18 @@ export default class ADLoginView extends React.Component {
 
     if(this._needRedirect) {
       // this._needRedirect = false
+      let isItAuthorizeURL = e.url.includes('https://login.microsoftonline.com/common/oauth2/authorize')
+      if (isItAuthorizeURL !== null) {
+        this._needRedirect = false
+        let context = this.props.context
+        let tenant = context.getConfig().tenant
+        // this.setState({
+        //   page : this._getLoginUrl(tenant || 'common'),
+        //   visible : false
+        // })
+        let afterLogout = this.props.afterLogout || function(){}
+        afterLogout(true)
+      }
       return true
     }
 

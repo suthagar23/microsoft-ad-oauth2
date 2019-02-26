@@ -1,4 +1,5 @@
 import React from 'react';
+import { Linking, WebBrowser } from 'expo';
 import { StyleSheet, Text, View, Button, AsyncStorage } from 'react-native';
 import {ReactNativeAD, ADLoginView, Logger} from './azureAD/index.js'
 
@@ -10,9 +11,12 @@ export default class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      logout: false,
-      logoutButtonVisible: false,
-      loginShow: false,
+      azureAdOauthActive: false,
+      azureLoginPortalVisible: false,
+      azureLogoutPortalVisible: false,
+      // logout: false,
+      // logoutButtonVisible: false,
+      // loginShow: false,
     }
   }
 
@@ -21,36 +25,29 @@ export default class App extends React.Component {
     lastLoginValue.then((value) => {
       console.log("lastLoginValue : ", value)
       if (value !== null) {
-        this.setState({
-          logout: false,
-          logoutButtonVisible: true
-        })
+        this.setState(Object.assign({}, this.state, { azureAdOauthActive: true, azureLogoutPortalVisible: false}))
       }
     })
-
-    this.setState(Object.assign({}, this.state, { logout: false}))
   }
 
   onLoginSuccess(credentials) {
     console.log(credentials)
-    // use the access token ..
-    this.setState({
-      logout: false,
-      logoutButtonVisible: true,
-    })
+    this.setState(Object.assign({}, this.state, { azureAdOauthActive: true, azureLoginPortalVisible: false}))
+  }
+
+  afterLogout(status) {
+    this.setState(Object.assign({}, this.state, { azureAdOauthActive: false, azureLoginPortalVisible: false, azureLogoutPortalVisible:false}))
   }
 
   onLoginClick() {
-    this.setState(Object.assign({}, this.state, { loginShow: true}))
+    this.setState(Object.assign({}, this.state, { azureLoginPortalVisible: true}))
   }
 
   async onLogout() {
     console.log("Logout")
     await AsyncStorage.removeItem(KEY)
-    this.setState({
-      logout: true,
-      logoutButtonVisible: false,
-    })
+    this.setState(Object.assign({}, this.state, { azureAdOauthActive: false, azureLoginPortalVisible:true, azureLogoutPortalVisible: true}))
+
   }
 
   render() {
@@ -62,7 +59,7 @@ export default class App extends React.Component {
     
     return (
       <View style={styles.container}>
-        {this.state.logoutButtonVisible ? 
+        {this.state.azureAdOauthActive ? 
           <View>
           <Text>Welcome to Testing App</Text>
           <Button title="Logout" onPress={this.onLogout.bind(this)} >  </Button>
@@ -70,12 +67,13 @@ export default class App extends React.Component {
           : 
 
           <View>
-            {this.state.loginShow ? 
+            {this.state.azureLoginPortalVisible ? 
               <ADLoginView
               context={ReactNativeAD.getContext(CLIENT_ID)}
               onSuccess={this.onLoginSuccess.bind(this)}
+              afterLogout={this.afterLogout.bind(this)}
               hideAfterLogin={true}
-              needLogout={this.state.logout} />
+              needLogout={this.state.azureLogoutPortalVisible} />
               :
               <Button title="Login with Azure AD" onPress={this.onLoginClick.bind(this)}></Button>
             }
