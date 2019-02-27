@@ -1,6 +1,6 @@
 // @flow
 import React, {Component} from 'react'
-import {WebView, Dimensions, AsyncStorage, Platform} from 'react-native'
+import {WebView, Dimensions, AsyncStorage, Platform, Text} from 'react-native'
 import CONST from './const.js'
 import ReactNativeAD from './ReactNativeAD.js'
 import Timer from 'react-timer-mixin'
@@ -14,6 +14,7 @@ export default class ADLoginView extends React.Component {
   props : {
     onSuccess? : ?Function,
     afterLogout? : ?Function,
+    onError? : ?Function,
     needLogout? : bool,
     style : any,
     onURLChange : Function,
@@ -31,6 +32,7 @@ export default class ADLoginView extends React.Component {
     tenant : 'common',
     onSuccess : () => {},
     afterLogout : () => {},
+    onError: () => {},
     onPageRequest : null
   };
 
@@ -141,6 +143,15 @@ export default class ADLoginView extends React.Component {
     }
   }
 
+  getParameterByName(name, url) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+ }
+
   /**
    * An interceptor for handling webview url change, when it detects possible
    * authorization code in url, it will triggers authentication flow.
@@ -162,7 +173,14 @@ export default class ADLoginView extends React.Component {
         let afterLogout = this.props.afterLogout || function(){}
         afterLogout(true)
       }
-      return true
+      return true;
+    }
+
+    let isAccessDenied = e.url.includes('https://login.microsoftonline.com/common/oauth2/nativeclient?error=');
+    if(isAccessDenied) {      
+      let onError = this.props.onError || function(){}
+      onError(this.getParameterByName("error", e.url))
+      return true;
     }
 
     if(this.props.onURLChange)
