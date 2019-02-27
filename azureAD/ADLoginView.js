@@ -146,23 +146,19 @@ export default class ADLoginView extends React.Component {
    * authorization code in url, it will triggers authentication flow.
    * @param  {object} e Navigation state change event object.
    */
-  _handleADToken(e:{ url:string }):any{
-    log.verbose('ADLoginView navigate to', e.url)
+  _handleADToken(e:{ url:string, title: string }):any{
     if(this._lock)
       return true
     let code = /((\?|\&)code\=)[^\&]+/.exec(e.url)
 
     if(this._needRedirect) {
+
       // this._needRedirect = false
-      let isItAuthorizeURL = e.url.includes('https://login.microsoftonline.com/common/oauth2/authorize')
-      if (isItAuthorizeURL !== null) {
+      let isItAuthorizeURL = e.title.includes('Sign in to your account')
+      if (isItAuthorizeURL !== false) {
         this._needRedirect = false
         let context = this.props.context
         let tenant = context.getConfig().tenant
-        // this.setState({
-        //   page : this._getLoginUrl(tenant || 'common'),
-        //   visible : false
-        // })
         let afterLogout = this.props.afterLogout || function(){}
         afterLogout(true)
       }
