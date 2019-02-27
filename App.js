@@ -56,7 +56,7 @@ export default class App extends React.Component {
 
   async cleanTokens(resources) {
     console.log("Clean Tokens")
-    for (let resource in resources){
+    for (let resource of resources){
       let key = `${CONFIG.client_id}.${resource}`
       await AsyncStorage.removeItem(key)
     }
