@@ -28,6 +28,8 @@ export default class App extends React.Component {
       azureAdOauthActive: false,
       azureLoginPortalVisible: false,
       azureLogoutPortalVisible: false,
+      showAzureError: false,
+      azureErrorMessage: "",
       reactNativeAD: new ReactNativeAD(CONFIG)
     }
   }
@@ -70,6 +72,17 @@ export default class App extends React.Component {
     this.setState(Object.assign({}, this.state, { azureLoginPortalVisible: true}))
   }
 
+  async onError(azureErrorMessage) {
+    await this.cleanTokens(CONFIG.resources);
+    this.setState(Object.assign({}, this.state, {
+      azureAdOauthActive: false, 
+      azureLoginPortalVisible: true, 
+      azureLogoutPortalVisible:true,
+      showAzureError:true,
+      azureErrorMessage: azureErrorMessage
+    }))
+  }
+
   async onLogout() {
     console.log("Logout");
     await this.cleanTokens(CONFIG.resources);
@@ -93,13 +106,16 @@ export default class App extends React.Component {
               context={ReactNativeAD.getContext(CONFIG.client_id)}
               onSuccess={this.onLoginSuccess.bind(this)}
               afterLogout={this.afterLogout.bind(this)}
+              onError={(azureErrorMessage) => this.onError(azureErrorMessage)}
               hideAfterLogin={true}
               needLogout={this.state.azureLogoutPortalVisible} />
               :
-              <Button title="Login with Azure AD" onPress={this.onLoginClick.bind(this)}></Button>
+              <>
+                {this.state.showAzureError ? <Text>{this.state.azureErrorMessage}</Text>: null}
+                <Button title="Login with Azure AD" onPress={this.onLoginClick.bind(this)}></Button>
+              </>
             }
-          </View>
-          
+          </View> 
         } 
       </View>
     );
