@@ -1,10 +1,12 @@
 // @flow
 import React, {Component} from 'react'
-import {WebView, Dimensions, AsyncStorage, Platform, Text} from 'react-native'
+import {WebView, Dimensions, Modal, AsyncStorage, Platform, Text, Button} from 'react-native'
 import CONST from './const.js'
 import ReactNativeAD from './ReactNativeAD.js'
 import Timer from 'react-timer-mixin'
 import log from './logger'
+
+import CONFIG from './Config'
 
 const loginUrl = 'https://login.microsoftonline.com/<tenant id>/oauth2/authorize'
 const tokenUrl = 'https://login.microsoftonline.com/common/oauth2/token'
@@ -15,6 +17,7 @@ export default class ADLoginView extends React.Component {
     onSuccess? : ?Function,
     afterLogout? : ?Function,
     onError? : ?Function,
+    handleModalOnRequestClose? : ?Function,
     needLogout? : bool,
     style : any,
     onURLChange : Function,
@@ -33,6 +36,7 @@ export default class ADLoginView extends React.Component {
     onSuccess : () => {},
     afterLogout : () => {},
     onError: () => {},
+    handleModalOnRequestClose: () => {},
     onPageRequest : null
   };
 
@@ -84,34 +88,40 @@ export default class ADLoginView extends React.Component {
     let js = `document.getElementsByTagName('body')[0].style.height = '${Dimensions.get('window').height}px';`
 
     return (
-        this.state.visible ? (<WebView
-          ref="ADLoginView"
-          automaticallyAdjustContentInsets={false}
-          style={[this.props.style, {
-            flex:1,
-            alignSelf : 'stretch',
-            width : Dimensions.get('window').width,
-            height : Dimensions.get('window').height
-          }]}
-          source={{uri: this.state.page}}
-          javaScriptEnabled={true}
-          domStorageEnabled={true} 
-          // renderLoading={()=>{
-          //   if(this._needRedirect){
-          //     this._needRedirect = false
-          //     let tenant = this.props.context.getConfig().tenant || 'common'
-          //     this.setState({page : this._getLoginUrl(tenant)})
-          //   }
-          // }}
-          decelerationRate="normal"
-          javaScriptEnabledAndroid={true}
-          onNavigationStateChange={this._handleADToken.bind(this)}
-          onShouldStartLoadWithRequest={(e) => {
-            return true
-          }}
-          startInLoadingState={false}
-          injectedJavaScript={js}
-          scalesPageToFit={true}/>) : null
+        this.state.visible ? (
+        
+          <Modal
+          transparent={false}
+          visible={this.state.visible}
+          onRequestClose={this.props.handleModalOnRequestClose}
+          presentationStyle="fullScreen"
+          supportedOrientations={['landscape-right']}
+          >
+          <Button onPress={() => this.props.handleModalOnRequestClose()} title="Close" >close</Button>
+
+          <WebView
+            ref="ADLoginView"
+            automaticallyAdjustContentInsets={false}
+            style={[this.props.style, {
+              flex:1,
+              alignSelf : 'stretch',
+              width : Dimensions.get('window').width,
+              height : Dimensions.get('window').height * 0.9
+            }]}
+            source={{uri: this.state.page}}
+            javaScriptEnabled={true}
+            domStorageEnabled={true} 
+            decelerationRate="normal"
+            javaScriptEnabledAndroid={true}
+            onNavigationStateChange={this._handleADToken.bind(this)}
+            onShouldStartLoadWithRequest={(e) => {
+              return true
+            }}
+            startInLoadingState={false}
+            injectedJavaScript={js}
+            scalesPageToFit={true}/>
+          </Modal>
+        ) : null
     )
   }
 
@@ -134,7 +144,7 @@ export default class ADLoginView extends React.Component {
              (prompt ? `&prompt=${context.getConfig().prompt}` : '')
       
       if(this._needRedirect)
-        result = `https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=${result}`
+        result = `${CONFIG.logoutURL}?post_logout_redirect_uri=${result}`
       console.log("URL : ", result)
       return result
     }
