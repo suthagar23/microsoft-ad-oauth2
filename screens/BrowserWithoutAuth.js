@@ -109,9 +109,7 @@ export default class BrowserWithoutAuthScreen extends React.Component {
       let result = await WebBrowser.openBrowserAsync(
         CONFIG.authURL
       );
-      console.log(result)
       await this._removeLinkingListener();
-      this.setState({ result });
     } catch (error) {
       alert(error);
       console.log(error);
@@ -120,11 +118,8 @@ export default class BrowserWithoutAuthScreen extends React.Component {
 
   async _handleLogout() {
 
-    const returnUrl = getDefaultReturnUrl();
-    let redirect =  AuthSession.getRedirectUrl();
-    
-    const authUrl = `${CONFIG.logoutURL}?post_logout_redirect_uri=${CONFIG.authURL}`;
-    const startUrl = getStartUrl(authUrl, returnUrl);
+    let redirect =  'exp://127.0.0.1:19000/--/expo-auth-session'
+    const authUrl = `${CONFIG.logoutURL}?post_logout_redirect_uri=${redirect}`;
     this.setState({
       ...this.state,
       userInfo: null,
@@ -168,32 +163,6 @@ const styles = StyleSheet.create({
   },
 });
 
-function getStartUrl(authUrl: string, returnUrl: string): string {
-  let queryString = qs.stringify({
-    authUrl,
-    returnUrl,
-  });
-
-  return `${getRedirectUrl()}/start?${queryString}`;
-}
-
-
-
-function getRedirectUrl(): string {
-  const redirectUrl = `${BASE_URL}/@see.thaa/test`;
-  if (__DEV__) {
-    _warnIfAnonymous('@see.thaa/test', redirectUrl);
-  }
-  return redirectUrl;
-}
-
-function _warnIfAnonymous(id, url): void {
-  if (id.startsWith('@anonymous/')) {
-    console.warn(
-      `You are not currently signed in to Expo on your development machine. As a result, the redirect URL for AuthSession will be "${url}". If you are using an OAuth provider that requires whitelisting redirect URLs, we recommend that you do not whitelist this URL -- instead, you should sign in to Expo to acquired a unique redirect URL. Additionally, if you do decide to publish this app using Expo, you will need to register an account to do it.`
-    );
-  }
-}
 
 
 function getDefaultReturnUrl(): string {

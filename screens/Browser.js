@@ -40,11 +40,10 @@ export default class BrowserScreen extends React.Component {
     };
     let access_tokens = {}
     let code = result.params.code;
-
     for (let resource of CONFIG.resources) {
         let config = { 
             client_id : CONFIG.client_id, 
-            redirect_uri: "exp://127.0.0.1:19000/--/expo-auth-session/webview", 
+            redirect_uri: "exp://10.1.11.183:19000/--/expo-auth-session/webview", 
             code, 
             client_secret:null,
             resource : resource
