@@ -44,7 +44,7 @@ export default class BrowserScreen extends React.Component {
     for (let resource of CONFIG.resources) {
         let config = { 
             client_id : CONFIG.client_id, 
-            redirect_uri: "exp://10.1.11.183:19000/--/expo-auth-session", 
+            redirect_uri: "exp://127.0.0.1:19000/--/expo-auth-session/webview", 
             code, 
             client_secret:null,
             resource : resource
@@ -90,8 +90,7 @@ export default class BrowserScreen extends React.Component {
       })
   };
 
-  async _handleLogout(){
-
+  async _handleLogout() {
     let redirect =  AuthSession.getRedirectUrl();
     let result = await AuthSession.startAsync({
       authUrl: `${CONFIG.logoutURL}?post_logout_redirect_uri=${redirect}`
@@ -101,25 +100,24 @@ export default class BrowserScreen extends React.Component {
       userInfo: null,
       access_token: null
     })
-  }
+  };
 
   render() {    
     return (
       <View style={styles.container}>
-
-<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        {!this.state.userInfo ? (
-          <>
-          <Button title="Open Browser to Login" onPress={this._handlePressAsync} />
-          
-          </>
-        ) : (
-          <>
-          <UserInfo userInfo={this.state.userInfo} />          
-          <Button title="Logout" onPress={this._handleLogout.bind(this)} />
-          </>
-        )}
-      </View>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          {!this.state.userInfo ? (
+            <>
+            <Button title="Open Browser to Login" onPress={this._handlePressAsync} />
+            
+            </>
+          ) : (
+            <>
+            <UserInfo userInfo={this.state.userInfo} />          
+            <Button title="Logout" onPress={this._handleLogout.bind(this)} />
+            </>
+          )}
+        </View>
       </View>
     );
   }
