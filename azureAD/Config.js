@@ -16,7 +16,7 @@ const CONFIG = {
 
     graphURI: 'https://graph.microsoft.com',
     authURL: `https://login.microsoftonline.com/common/oauth2/authorize` + `?client_id=${CLIENT_ID}&response_type=code`,
-    logoutURL: 'https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri'
+    logoutURL: 'https://login.microsoftonline.com/common/oauth2/logout'
   }
 
 export default CONFIG;
