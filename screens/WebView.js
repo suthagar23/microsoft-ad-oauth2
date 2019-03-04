@@ -102,15 +102,36 @@ export default class WebViewScreen extends React.Component {
   }
 
   async onError(azureErrorMessage) {
-    await this.cleanTokens(CONFIG.resources);
-    this.setState(Object.assign({}, this.state, {
-      azureAdOauthActive: false, 
-      access_token: null,
-      azureLoginPortalVisible: true, 
-      azureLogoutPortalVisible:true,
-      showAzureError:true,
-      azureErrorMessage: azureErrorMessage
-    }))
+    
+    let token;
+    for (let resource of CONFIG.resources) {
+      let key = `${CONFIG.client_id}.${resource}`
+      token = await AsyncStorage.getItem(key)
+      if(token !== null){
+        break
+      }
+    }
+    
+    if(token){
+      await this.cleanTokens(CONFIG.resources);
+      this.setState(Object.assign({}, this.state, {
+        azureAdOauthActive: false, 
+        access_token: null,
+        azureLoginPortalVisible: true, 
+        azureLogoutPortalVisible:true,
+        showAzureError:true,
+        azureErrorMessage: azureErrorMessage
+      }))
+    } else {
+      this.setState(Object.assign({}, this.state, {
+        azureAdOauthActive: false, 
+        access_token: null,
+        azureLoginPortalVisible: false, 
+        azureLogoutPortalVisible:false,
+        showAzureError:true,
+        azureErrorMessage: azureErrorMessage
+      }))
+    }
   }
 
   async onLogout() {

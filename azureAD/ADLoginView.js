@@ -113,11 +113,13 @@ export default class ADLoginView extends React.Component {
             domStorageEnabled={true} 
             decelerationRate="normal"
             javaScriptEnabledAndroid={true}
-            onNavigationStateChange={this._handleADToken.bind(this)}
+            originWhitelist={["*"]}
             onShouldStartLoadWithRequest={(e) => {
+              console.log(e)
               return true
             }}
-            startInLoadingState={false}
+            onNavigationStateChange={this._handleADToken.bind(this)}
+            startInLoadingState={true}
             injectedJavaScript={js}
             scalesPageToFit={true}/>
           </Modal>
@@ -168,6 +170,16 @@ export default class ADLoginView extends React.Component {
    * @param  {object} e Navigation state change event object.
    */
   _handleADToken(e:{ url:string, title: string }):any{
+    
+
+
+    let isAccessDenied = e.url.includes('error=');
+    if(isAccessDenied) {      
+      let onError = this.props.onError || function(){}
+      onError(this.getParameterByName("error", e.url))
+      return true;
+    }
+
     if(this._lock)
       return true
     let code = /((\?|\&)code\=)[^\&]+/.exec(e.url)
@@ -183,13 +195,6 @@ export default class ADLoginView extends React.Component {
         let afterLogout = this.props.afterLogout || function(){}
         afterLogout(true)
       }
-      return true;
-    }
-
-    let isAccessDenied = e.url.includes('https://login.microsoftonline.com/common/oauth2/nativeclient?error=');
-    if(isAccessDenied) {      
-      let onError = this.props.onError || function(){}
-      onError(this.getParameterByName("error", e.url))
       return true;
     }
 
